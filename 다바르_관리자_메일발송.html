@@ -50,6 +50,9 @@
         });
         const result = await response.json();
         status.textContent = result.ok ? result.sent + '명에게 발송했습니다.' : '발송에 실패했습니다.';
+        if (result.ok) {
+          alert('완료되었습니다.');
+        }
       };
       reader.readAsDataURL(file);
     });
