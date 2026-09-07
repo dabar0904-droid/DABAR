@@ -630,42 +630,8 @@
   <div class="contact">문의 · <a href="mailto:dabar0904@gmail.com">dabar0904@gmail.com</a></div>
 </footer>
 
-<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
-
 <script>
-  /* ============================================================
-     구글폼 연동 설정 — 아래 세 값을 지아나 님의 실제 구글폼 값으로 바꿔주세요.
-     (forms.google.com에서 폼 만들고, 페이지 소스에서 entry.숫자 찾기)
-     세 값을 저에게 알려주시면 제가 바로 채워드릴 수도 있어요.
-     ============================================================ */
-  const GOOGLE_FORM_ID = 'FORM_ID_HERE';               // 폼 주소의 /e/ 뒤에 오는 긴 문자열
-  const ENTRY_NAME = 'entry.XXXXXXXXX';                 // 성함 질문의 entry ID
-  const ENTRY_EMAIL = 'entry.XXXXXXXXX';                // 이메일 질문의 entry ID
-
-  const GOOGLE_FORM_ACTION = 'https://docs.google.com/forms/d/e/' + GOOGLE_FORM_ID + '/formResponse';
-
-  function submitToGoogleForm(name, email){
-    if(GOOGLE_FORM_ID === 'FORM_ID_HERE') return; // 아직 연동 전이면 조용히 건너뜀
-    const f = document.createElement('form');
-    f.action = GOOGLE_FORM_ACTION;
-    f.method = 'POST';
-    f.target = 'hidden_iframe';
-    f.style.display = 'none';
-
-    const i1 = document.createElement('input');
-    i1.name = ENTRY_NAME;
-    i1.value = name;
-    const i2 = document.createElement('input');
-    i2.name = ENTRY_EMAIL;
-    i2.value = email;
-
-    f.appendChild(i1);
-    f.appendChild(i2);
-    document.body.appendChild(f);
-    f.submit();
-    document.body.removeChild(f);
-  }
-
+  const SIGNUP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbza4M11DmceSebBZjeQCCnyQqYzpHZrkuzRSPEMWP0p4ltskIUuXHPzKqY7VNaiIJGk/exec';
 
   const form = document.getElementById('signupForm');
   const thanksMsg = document.getElementById('thanksMsg');
@@ -674,16 +640,21 @@
     e.preventDefault();
     const name = document.getElementById('signupName').value.trim();
     const email = document.getElementById('signupEmail').value.trim();
-    const ts = new Date().toISOString();
-    const key = 'signup:' + Date.now() + '-' + Math.random().toString(36).slice(2,7);
-
-    try{
-      await window.storage.set(key, JSON.stringify({name, email, ts}), true);
-    }catch(err){
-      console.error('저장 실패:', err);
+    if(SIGNUP_ENDPOINT === 'PASTE_APPS_SCRIPT_WEB_APP_URL_HERE'){
+      alert('아직 신청 폼이 연결되지 않았습니다. 관리자에게 문의해주세요.');
+      return;
     }
 
-    submitToGoogleForm(name, email);
+    const response = await fetch(SIGNUP_ENDPOINT, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'signup', name, email})
+    });
+
+    if(!response.ok){
+      alert('신청을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
 
     form.style.display = 'none';
     thanksMsg.style.display = 'block';
