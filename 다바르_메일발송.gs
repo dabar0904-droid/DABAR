@@ -1,6 +1,6 @@
 const SPREADSHEET_ID = 'PASTE_SPREADSHEET_ID_HERE';
 const RECIPIENT_SHEET = '응답';
-const ADMIN_TOKEN = 'CHANGE_THIS_ADMIN_TOKEN';
+const ADMIN_TOKEN = 'dabar0904';
 
 function doPost(e) {
   const payload = JSON.parse(e.postData.contents || '{}');
@@ -27,15 +27,19 @@ function saveSignup_(payload) {
 }
 
 function sendFile_(payload) {
-  if (!payload.fileName || !payload.fileData || !payload.subject || !payload.message) {
+  if (!payload.subject || !payload.message) {
     return json_({ok: false, error: 'invalid_request'});
   }
 
-  const blob = Utilities.newBlob(
-    Utilities.base64Decode(payload.fileData),
-    payload.mimeType || 'application/octet-stream',
-    payload.fileName
-  );
+  const attachments = [];
+  if (payload.fileName && payload.fileData) {
+    attachments.push(Utilities.newBlob(
+      Utilities.base64Decode(payload.fileData),
+      payload.mimeType || 'application/octet-stream',
+      payload.fileName
+    ));
+  }
+
   const rows = getSheet_().getDataRange().getValues();
   const recipients = [...new Set(rows.slice(1).map(row => String(row[2]).trim()).filter(Boolean))];
 
@@ -43,7 +47,7 @@ function sendFile_(payload) {
     to: email,
     subject: payload.subject,
     body: payload.message,
-    attachments: [blob]
+    attachments: attachments
   }));
 
   return json_({ok: true, sent: recipients.length});

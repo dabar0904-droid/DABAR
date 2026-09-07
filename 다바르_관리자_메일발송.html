@@ -22,8 +22,8 @@
     <input id="subject" required>
     <label for="message">메일 내용</label>
     <textarea id="message" required></textarea>
-    <label for="file">첨부 파일</label>
-    <input id="file" type="file" required>
+    <label for="file">첨부 파일 (선택)</label>
+    <input id="file" type="file">
     <button type="submit">응답자에게 발송</button>
   </form>
   <div id="status" role="status"></div>
@@ -32,27 +32,34 @@
     const sendForm = document.getElementById('sendForm');
     const status = document.getElementById('status');
 
-    sendForm.addEventListener('submit', async event => {
+    async function sendMail(extra) {
+      const response = await fetch(SEND_ENDPOINT, {
+        method:'POST',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body:JSON.stringify(Object.assign({
+          action:'send', token:document.getElementById('token').value,
+          subject:document.getElementById('subject').value,
+          message:document.getElementById('message').value
+        }, extra))
+      });
+      const result = await response.json();
+      status.textContent = result.ok ? result.sent + '명에게 발송했습니다.' : '발송에 실패했습니다.';
+      if (result.ok) {
+        alert('완료되었습니다.');
+      }
+    }
+
+    sendForm.addEventListener('submit', event => {
       event.preventDefault();
       const file = document.getElementById('file').files[0];
+      if (!file) {
+        sendMail({});
+        return;
+      }
       const reader = new FileReader();
-      reader.onload = async () => {
+      reader.onload = () => {
         const base64 = String(reader.result).split(',')[1];
-        const response = await fetch(SEND_ENDPOINT, {
-          method:'POST',
-          headers:{'Content-Type':'text/plain;charset=utf-8'},
-          body:JSON.stringify({
-            action:'send', token:document.getElementById('token').value,
-            subject:document.getElementById('subject').value,
-            message:document.getElementById('message').value,
-            fileName:file.name, mimeType:file.type, fileData:base64
-          })
-        });
-        const result = await response.json();
-        status.textContent = result.ok ? result.sent + '명에게 발송했습니다.' : '발송에 실패했습니다.';
-        if (result.ok) {
-          alert('완료되었습니다.');
-        }
+        sendMail({fileName:file.name, mimeType:file.type, fileData:base64});
       };
       reader.readAsDataURL(file);
     });
