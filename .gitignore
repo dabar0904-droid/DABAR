@@ -1,0 +1,15 @@
+# Internal planning documents and generated reports
+/다바르_추가기능_기획제안서.md
+/output/
+
+# Local administrator UI and private operational data
+/다바르_관리자_메일발송.html
+/private/
+/secrets/
+.env
+.env.*
+!.env.example
+
+# Temporary files
+/tmp/
+*.log

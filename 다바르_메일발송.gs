@@ -1,6 +1,4 @@
-const SPREADSHEET_ID = 'PASTE_SPREADSHEET_ID_HERE';
 const RECIPIENT_SHEET = '응답';
-const ADMIN_TOKEN = 'dabar0904';
 
 function doPost(e) {
   const payload = JSON.parse(e.postData.contents || '{}');
@@ -9,8 +7,11 @@ function doPost(e) {
     return saveSignup_(payload);
   }
 
-  if (payload.action === 'send' && payload.token === ADMIN_TOKEN) {
-    return sendFile_(payload);
+  if (payload.action === 'send') {
+    const adminToken = PropertiesService.getScriptProperties().getProperty('ADMIN_TOKEN');
+    if (adminToken && typeof payload.token === 'string' && payload.token === adminToken) {
+      return sendFile_(payload);
+    }
   }
 
   return json_({ok: false, error: 'unauthorized'});
@@ -54,7 +55,11 @@ function sendFile_(payload) {
 }
 
 function getSheet_() {
-  return SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(RECIPIENT_SHEET);
+  const spreadsheetId = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
+  if (!spreadsheetId) {
+    throw new Error('SPREADSHEET_ID script property is not configured');
+  }
+  return SpreadsheetApp.openById(spreadsheetId).getSheetByName(RECIPIENT_SHEET);
 }
 
 function json_(value) {
