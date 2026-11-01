@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <title>다바르</title>
+  <rect width="64" height="64" rx="12" fill="#211F1B"/>
+  <g fill="none" stroke="#D9BE72" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M26 15V8h12v7"/>
+    <circle cx="32" cy="36" r="21"/>
+    <path d="M21 41V31m11 12V25m11 16V30M20 44c0-12 24-12 24 0"/>
+  </g>
+</svg>
